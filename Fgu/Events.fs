@@ -1,13 +1,14 @@
-﻿module Fgu.Events
+﻿namespace Fgu 
+  module Events =
 
     open System
 
-    type Event = { 
+    type RiskEvent = { 
         day_of_year : int;
         year : int;
         loss : float }
 
-    let generate_events n the_year = 
+    let generate_events (n : int) (the_year: int) : RiskEvent list= 
         let rnd = System.Random()
         let single_event day = {day_of_year = day; year = the_year; loss = rnd.NextDouble()*(20.0*1000.0*1000.0) }
         in
