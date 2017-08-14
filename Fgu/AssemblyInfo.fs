@@ -10,9 +10,9 @@ open System.Runtime.InteropServices
 [<assembly: AssemblyTitle("Fgu")>]
 [<assembly: AssemblyDescription("")>]
 [<assembly: AssemblyConfiguration("")>]
-[<assembly: AssemblyCompany("Vagrant Inc.")>]
+[<assembly: AssemblyCompany("")>]
 [<assembly: AssemblyProduct("Fgu")>]
-[<assembly: AssemblyCopyright("Copyright © Vagrant Inc. 2017")>]
+[<assembly: AssemblyCopyright("Copyright © Klaus Alfert 2017")>]
 [<assembly: AssemblyTrademark("")>]
 [<assembly: AssemblyCulture("")>]
 
