@@ -1,6 +1,6 @@
 NUGET
   remote: https://api.nuget.org/v3/index.json
-    FSharp.Core (3.1.2.5) - restriction: >= net452
+    FSharp.Core (4.2.2) - restriction: >= net452
     FsUnit (3.0) - restriction: >= net452
       FSharp.Core (>= 3.1.2.5) - restriction: < netstandard1.6
       NUnit (>= 3.6)
@@ -13,8 +13,8 @@ NUGET
       NUnit.Extension.TeamCityEventListener (>= 1.0.2)
       NUnit.Extension.VSProjectLoader (>= 3.5)
     NUnit.ConsoleRunner (3.7) - restriction: >= net452
-    NUnit.Extension.NUnitProjectLoader (3.5) - restriction: >= net452
-    NUnit.Extension.NUnitV2Driver (3.6) - restriction: >= net452
-    NUnit.Extension.NUnitV2ResultWriter (3.5) - restriction: >= net452
+    NUnit.Extension.NUnitProjectLoader (3.6) - restriction: >= net452
+    NUnit.Extension.NUnitV2Driver (3.7) - restriction: >= net452
+    NUnit.Extension.NUnitV2ResultWriter (3.6) - restriction: >= net452
     NUnit.Extension.TeamCityEventListener (1.0.2) - restriction: >= net452
-    NUnit.Extension.VSProjectLoader (3.5) - restriction: >= net452
+    NUnit.Extension.VSProjectLoader (3.6) - restriction: >= net452
