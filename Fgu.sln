@@ -5,6 +5,15 @@ VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fgu", "Fgu\Fgu.fsproj", "{F12FE3CA-E8F5-4A62-ACFB-E3ADC6BE7439}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{A8E76A9B-0550-47AB-B60D-EF8F23DEE642}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Tutorial1", "Tutorial1\Tutorial1.fsproj", "{A66CE374-0654-43AA-AF45-C34F99A36C14}"
+EndProject
+Project("{F2A71F9B-5D33-465A-A702-920D77279786}") = "Fgu.Test", "Fgu.Test\Fgu.Test.fsproj", "{2F07DE62-B978-4361-BDFD-6E3FA03A4AB4}"
+	ProjectSection(ProjectDependencies) = postProject
+		{F12FE3CA-E8F5-4A62-ACFB-E3ADC6BE7439} = {F12FE3CA-E8F5-4A62-ACFB-E3ADC6BE7439}
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,8 +24,20 @@ Global
 		{F12FE3CA-E8F5-4A62-ACFB-E3ADC6BE7439}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F12FE3CA-E8F5-4A62-ACFB-E3ADC6BE7439}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F12FE3CA-E8F5-4A62-ACFB-E3ADC6BE7439}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A66CE374-0654-43AA-AF45-C34F99A36C14}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A66CE374-0654-43AA-AF45-C34F99A36C14}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A66CE374-0654-43AA-AF45-C34F99A36C14}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A66CE374-0654-43AA-AF45-C34F99A36C14}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2F07DE62-B978-4361-BDFD-6E3FA03A4AB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2F07DE62-B978-4361-BDFD-6E3FA03A4AB4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2F07DE62-B978-4361-BDFD-6E3FA03A4AB4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2F07DE62-B978-4361-BDFD-6E3FA03A4AB4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{A66CE374-0654-43AA-AF45-C34F99A36C14} = {A8E76A9B-0550-47AB-B60D-EF8F23DEE642}
+		{2F07DE62-B978-4361-BDFD-6E3FA03A4AB4} = {A8E76A9B-0550-47AB-B60D-EF8F23DEE642}
 	EndGlobalSection
 EndGlobal
