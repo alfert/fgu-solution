@@ -17,6 +17,7 @@ let appReferences  =
 let testAssemblies = 
     !! (buildDir + "*Tests.dll") 
     ++ (buildDir + "*Test.dll")
+    ++ (buildDir + "*Test.exe")
 
 // version info
 let version = "0.1"  // or retrieve from CI server
