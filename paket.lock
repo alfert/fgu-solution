@@ -1,5 +1,6 @@
 NUGET
   remote: https://api.nuget.org/v3/index.json
+    FAKE (4.63)
     FSharp.Core (4.2.2) - restriction: >= net452
     FsUnit (3.0) - restriction: >= net452
       FSharp.Core (>= 3.1.2.5) - restriction: < netstandard1.6
