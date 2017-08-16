@@ -9,6 +9,11 @@
         year : int;
         loss : float }
 
+    type ContractEvent = {
+        id : int;
+        loss : float;
+    }
+
     let generateEvents (n : int) (the_year: int) : RiskEvent list= 
         let rnd = System.Random()
         let newDay() = rnd.Next(365) + 1
