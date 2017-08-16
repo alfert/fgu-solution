@@ -6,3 +6,5 @@ nuget FSharp.Core ~> 4.2 restriction: >= net452
 nuget FsUnit 3.0.0 restriction: >= net452
 nuget NUnit 3.6.0 restriction: >= net452
 nuget NUnit.Console 3.7.0 restriction: >= net452
+nuget FsCheck 2.9.0 restriction: >= net452
+nuget FsCheck.Nunit restriction: >= net452
