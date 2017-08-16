@@ -1,6 +1,8 @@
 ﻿module TestEvents
     open NUnit.Framework
     open FsUnit
+    open FsCheck
+    open FsCheck.NUnit
 
     open Fgu.Events
 
@@ -12,3 +14,8 @@
             (List.length es) |> should equal 1
         
 
+    [<Property(QuietOnSuccess = true)>]
+    let AddPlusOneProperty (eventCount) = 
+        eventCount >= 0 ==> 
+            let es = generate_events eventCount 2017
+            List.length(es) <= eventCount
