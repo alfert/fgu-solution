@@ -12,11 +12,11 @@
     }
 
     // apply_events :: RiskEvents list -> QuotaShareContract -> float
-    let apply_events_qs(events: RiskEvent list, contract: QuotaShareContract) : float = 
+    let apply_events_qs(events: RiskEvent list, contract: QuotaShareContract) : float list = 
         let factor = contract.quota_share * contract.quota_part
         in
             events 
-            |> List.sumBy(fun e -> e.loss * factor)
+            |> List.map(fun e -> e.loss * factor)
 
     type Contract = 
         | QuotaShare of QuotaShareContract
