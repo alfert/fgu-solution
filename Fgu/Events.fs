@@ -3,6 +3,12 @@
 
     open System
 
+    // 2 letter country codes 
+    type Country = DE | AT | FR | GB | ES | US | PL | CH | IT | NL | BE
+
+    // Nat Cat Risk types
+    type NatCatRisk = Storm | Earthquake | Fire | Flood | Hail
+
     type RiskEvent = { 
         id : int;
         day_of_year : int;
