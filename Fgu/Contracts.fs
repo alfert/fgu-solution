@@ -33,15 +33,15 @@
         let prio = contract.estimated_premium_income * contract.priority
         let sl = contract.estimated_premium_income * contract.stop_loss
         let payment = function
-            | loss when loss < prio      -> 0
-            | loss when loss > prio + sl -> 0
+            | loss when loss < prio      -> 0.0
+            | loss when loss > prio + sl -> 0.0
             | loss                       -> loss - prio
-        let apply cumul ev = 
-            (cumul + ev.loss, payment cumul + ev.loss)
+        let calcCumul(cumul:float) (e : RiskEvent) = ((e, cumul + e.loss), cumul + e.loss)
         in 
             events
-            |> List.mapFold (fun cumul e -> (e, cumul + e.loss)) 0
-            |> List.map (fun (e, cumul) -> {id = e.id, loss = min(e.loss, cumul)})
+            |> List.mapFold calcCumul 0.0
+            |> fst // ignore the cumul summary here (technically required from mapFold)
+            |> List.map (fun (e, cumul) -> {id = e.id; loss = min e.loss cumul})
 
 
     type Contract = 
