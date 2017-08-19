@@ -11,7 +11,7 @@
         commission : float; 
     }
 
-    let applyEventsQS(events: RiskEvent list, contract: QuotaShareContract) : ContractEvent list = 
+    let applyEventsQS(contract: QuotaShareContract)  (events: RiskEvent list) : ContractEvent list = 
         let factor = contract.quota_share * contract.quota_part
         in
             events 
@@ -29,7 +29,7 @@
     // (in sum lower than prio) have nothing to pay, whereas as later events have to pay. 
     // This may be a partial payment of the loss, if we jump from lower than prio to above prio. 
     // Therefore we the min-function to derive the payment.
-    let applyEventsSL(events: RiskEvent list, contract: StopLossContract) : ContractEvent list = 
+    let applyEventsSL (contract: StopLossContract) (events: RiskEvent list) : ContractEvent list = 
         let prio = contract.estimated_premium_income * contract.priority
         let sl = contract.estimated_premium_income * contract.stop_loss
         let payment = function
