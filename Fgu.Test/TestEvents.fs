@@ -27,3 +27,8 @@
         match selectOneOf xs with
         | None   -> List.isEmpty xs 
         | Some x -> List.contains x xs  
+
+    [<Property(QuietOnSuccess = true)>]
+    let ``empty countries and risks generate None events`` (eventCount) = 
+        (generateEvents eventCount [] [] 2017)
+        |> List.forall(fun ev -> ev.country = None && ev.risk = None)
