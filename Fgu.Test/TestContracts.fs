@@ -8,7 +8,8 @@ module TestContracts
     open Fgu.Events
 
     // Comparison that prints the left and righ parameters
-    let (.=.) left right = left = right |@ sprintf "%A = %A" left right
+    let (.=.) (left: float) (right: float) =
+         (abs left - right) < 1.0e-5 |@ sprintf "%A = %A" left right
    
     [<Property(QuietOnSuccess = true)>]
     let ``unsigned ints are always positive`` (eventCount : uint16) = 
@@ -28,29 +29,25 @@ module TestContracts
         // generate events and calc the summary here, compared to the sum of contract events
         let es = generateEvents (int eventCount) [DE] [Storm] 2017
         let q = 0.5
-        let c = { estimated_premium_income = 20.0 * 1000.0 * 1000.0; stop_loss = q; priority= q}
+        let c = makeSL (20.0 * 1000.0 * 1000.0) q q
         // min(Haftung, max(0, X- Priorität))
-        let sl = c.estimated_premium_income * (c.stop_loss + c.priority)
-        let prio = c.estimated_premium_income * c.priority
-        let cut s = max 0.0 ((min s sl) - prio)
-        let allLosses = es |> List.sumBy (fun (ev : RiskEvent) -> ev.loss)
+        let cut s = min c.stop_loss (max 0.0 (s - c.priority))
+        let allLosses = es |> List.sumBy (fun (ev : RiskEvent) -> ev.loss) |> cut
         (allLosses)  .=.
             (es |> (applyEventsSL c) |> List.sumBy (fun (ev : ContractEvent) -> ev.loss))
-        |> Prop.classify(allLosses >= sl) "loss > plafond"
-        |> Prop.classify(allLosses < sl && allLosses >= prio) "loss > prio"
-        |> Prop.classify(allLosses < prio) "loss < prio"
+        |> Prop.classify(allLosses >= c.stop_loss) "loss > plafond"
+        |> Prop.classify(allLosses < c.stop_loss && allLosses >= c.priority) "loss > prio"
+        |> Prop.classify(allLosses < c.priority) "loss < prio"
         |> Prop.collect(List.length(es))
     
     [<Test>]
-    let ``1 small events means no payment``() = 
-        let es = generateEvents (1) [DE] [Storm] 2017
+    let ``1 event means easier argumentation``() = 
+        let es = generateEvents 1 [DE] [Storm] 2017
         let q = 0.5
-        let c = { estimated_premium_income = 20.0 * 1000.0 * 1000.0; stop_loss = q; priority= q}
+        let c = makeSL (20.0 * 1000.0 * 1000.0) q q 
         let losses = es |> applyEventsSL c
         List.length(losses) |> should equal 1
-        let [l] = losses
-        let [e] = es 
-        let sl = c.estimated_premium_income * (c.stop_loss + c.priority)
-        let prio = c.estimated_premium_income * c.priority
-        let payment = max 0.0 ((min e.loss sl) - prio)
-        l.loss |> should equal payment
+        let l = losses.Head
+        let e = es.Head 
+        let expectedPayment = min c.stop_loss (max 0.0 (e.loss - c.priority))
+        l.loss |> should equal expectedPayment
