@@ -31,12 +31,13 @@
     // Therefore we the min-function to derive the payment.
     let applyEventsSL (contract: StopLossContract) (events: RiskEvent list) : ContractEvent list = 
         let prio = contract.estimated_premium_income * contract.priority
-        let sl = contract.estimated_premium_income * contract.stop_loss
-        let payment = function
-            | loss when loss < prio      -> 0.0
-            | loss when loss > prio + sl -> 0.0
-            | loss                       -> loss - prio
-        let calcCumul(cumul:float) (e : RiskEvent) = ((e, cumul + e.loss), cumul + e.loss)
+        let sl = contract.estimated_premium_income * (contract.stop_loss + contract.priority)
+        let payment c loss = 
+            match (c, loss) with
+            | (c, loss) when c + loss < prio  -> 0.0
+            | (c, loss) when c > prio + sl    -> 0.0
+            | (c, loss) -> (min (c+loss) (prio + sl)) - c
+        let calcCumul(cumul:float) (e : RiskEvent) = ((e, payment cumul e.loss ), cumul + e.loss)
         in 
             events
             |> List.mapFold calcCumul 0.0
