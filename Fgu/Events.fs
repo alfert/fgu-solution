@@ -23,6 +23,8 @@
         loss : float;
     }
 
+    let makeContractEvent (risk: RiskEvent) (loss: float) = {id = risk.id; loss = loss}
+    
     let rnd = System.Random()  
     let selectOneOf elements = 
         match elements with
