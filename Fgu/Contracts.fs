@@ -15,7 +15,7 @@
         let factor = contract.quota_share * contract.quota_part
         in
             events 
-            |> List.map(fun e -> {id = e.id; loss = e.loss * factor})
+            |> List.map(fun e -> makeContractEvent e (e.loss * factor))
 
     type StopLossContract = {
         estimated_premium_income : float; // EPI: what the insurance get from their customers
@@ -57,7 +57,8 @@
             events
             |> List.mapFold calcCumul 0.0
             |> fst // ignore the cumul summary here (technically required from mapFold)
-            |> List.map (fun (e, cumul) -> {id = e.id; loss = min e.loss cumul})
+        |> List.map (fun (e, cumul) -> makeContractEvent e (min e.loss cumul))
+
 
 
     type Contract = 
