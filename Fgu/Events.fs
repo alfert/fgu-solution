@@ -46,3 +46,15 @@
             [1..n]
             |> List.map(newDayAndId >> fun (d, id) -> singleEvent d id) 
             |> List.sortBy(fun ev -> ev.day_of_year)
+    
+    let generateEvents2 (countries: Country list) (risks: NatCatRisk list) (theYear: int) (losses: float list) : RiskEvent list = 
+        let c = selectOneOf countries
+        let r = selectOneOf risks
+        let makeEvent day id loss = {
+            day_of_year = day; year = theYear; id = id; country = c; risk = r;
+            loss = loss;
+        }
+        losses 
+        |> List.indexed
+        |> List.map (fun (k,l) -> makeEvent (rnd.Next(365) + 1) k l)
+        |> List.sortBy (fun ev -> ev.day_of_year)
