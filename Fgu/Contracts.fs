@@ -37,6 +37,18 @@
             plafond = epi * (prio + sl);
         }
 
+    let xs (liability: float) (priority: float) = 
+        let plafond = liability + priority
+        in 
+        { 
+            estimated_premium_income = plafond;
+            priority_p = priority / plafond;
+            stop_loss_p = liability / plafond;
+            priority = priority;
+            stop_loss = liability;
+            plafond = plafond;
+        }
+
     // An SL contracts summarizies about a year (or financial period, i.e. all members of of 
     // the event list). Payments occur only within the band of prio and sl. We map here the 
     // events to the their share of payments to be made. This means that the first events 
