@@ -12,7 +12,13 @@
         let es = generateEvents 1 [DE] [Storm] 2017
         in
             (List.length es) |> should equal 1
-        
+     
+    [<Test>]
+    let ``create no event`` () = 
+        let es = generateEvents 0 [DE] [Storm] 2017
+        in
+            (List.length es) |> should equal 0
+            
 
     [<Property(QuietOnSuccess = true)>]
     let AddPlusOneProperty (eventCount) = 
