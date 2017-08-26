@@ -74,24 +74,28 @@ module TestContracts
             |> List.sumBy(fun e -> e.loss))
             |> cut
             .=. losses
-(*
-    [<Property(QuietOnSuccess=true)>]
-    let ``ìnvariant sums of a doubled layered XL contract: ``(ls : uint16 list) = 
-        let es = generateEvents2  [DE] [Storm] 2017 (ls |> List.map float)
+
+    [<Property(QuietOnSuccess=false)>]
+    let ``ìnvariant sums of a doubled layered XL contract: ``(ls : uint32 list) = 
+        let times10 x = 10.0 * x
+        let lFloats = (ls |> List.map (float >> times10))
+        let es = generateEvents2  [DE] [Storm] 2017 lFloats
         let minLoss =  3000.0 
         let maxLoss = 10000.0
-        let c = makeXLperRisk [Storm] [(xs minLoss 5000.0); (xs 8000.0  maxLoss) ]
+        let liability1 = 5000.0
+        let liability2 = maxLoss - liability1 - minLoss
+        let c = makeXLperRisk [Storm] [(xs liability1 minLoss); (xs liability2 (minLoss + liability1)  ) ]
         let losses = es |> applyEventsXLperRisk c |> List.sumBy (fun e -> e.loss) 
         // min(Haftung, max(0, X- Priorität))
         let cut s = min (maxLoss - minLoss) (max 0.0 (s - minLoss))
         in 
             (es 
-            // |> List.filter(fun e -> e.loss >= minLoss && e.loss <= maxLoss)
             |> List.sumBy(fun e -> e.loss))
             |> cut
             .=. losses
-            |> Prop.collect(List.sum(ls))
-*)
+            |> (Prop.classify (List.sum(lFloats) > minLoss) "lFloats above minLoss")
+            |> (Prop.classify (List.sum(lFloats) > maxLoss) "lFloats above maxLoss")
+            |> (Prop.classify (List.sum(lFloats) <= maxLoss) "lFloats below maxLoss")
 
     [<Property(QuietOnSuccess=true)>]
     let ``contains for proper subsets`` (x : NatCatRisk) (ys: NatCatRisk list) = 
