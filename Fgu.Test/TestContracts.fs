@@ -24,7 +24,7 @@ module TestContracts
         ((es |> List.sumBy (fun (ev : RiskEvent) -> ev.loss)) * q * q)  =
             (es |> (applyEventsQS c) |> List.sumBy (fun (ev : ContractEvent) -> ev.loss))
 
-    [<Property(Verbose = true)>]
+    [<Property(QuietOnSuccess = true)>]
     let ``StopLoss sums are correct`` (eventCount : uint16) = 
         // generate events and calc the summary here, compared to the sum of contract events
         let es = generateEvents (int eventCount) [DE] [Storm] 2017
@@ -39,7 +39,7 @@ module TestContracts
         |> Prop.classify(allLosses < c.stop_loss && allLosses >= c.priority) "loss > prio"
         |> Prop.classify(allLosses < c.priority) "loss < prio"
         |> Prop.collect(List.length(es))
-    
+
     [<Test>]
     let ``1 event means easier argumentation``() = 
         let es = generateEvents 1 [DE] [Storm] 2017
@@ -60,7 +60,7 @@ module TestContracts
         |> List.sumBy (fun e -> e.loss) 
         = 0.0
 
-    [<Property(Verbose=true)>]
+    [<Property(QuietOnSuccess=true)>]
     let ``ìnvariant sums of a single layered XL contract: ``(ls : uint32 list) = 
         let es = generateEvents2  [DE] [Storm] 2017 (ls |> List.map float)
         let minLoss = 3000000.0 
@@ -74,8 +74,8 @@ module TestContracts
             |> List.sumBy(fun e -> e.loss))
             |> cut
             .=. losses
-
-    [<Property(Verbose=true)>]
+(*
+    [<Property(QuietOnSuccess=true)>]
     let ``ìnvariant sums of a doubled layered XL contract: ``(ls : uint16 list) = 
         let es = generateEvents2  [DE] [Storm] 2017 (ls |> List.map float)
         let minLoss =  3000.0 
@@ -90,3 +90,71 @@ module TestContracts
             |> List.sumBy(fun e -> e.loss))
             |> cut
             .=. losses
+            |> Prop.collect(List.sum(ls))
+*)
+
+    [<Property(QuietOnSuccess=true)>]
+    let ``contains for proper subsets`` (x : NatCatRisk) (ys: NatCatRisk list) = 
+        (List.contains x ys) = (contains (Some x) ys)
+
+    [<Property()>] 
+    let ``calcCumul calcs correctly with cumul = 0`` (l : uint16) =
+        let loss = float l
+        let prio = 3000.0
+        let liability = 5000.0
+        let contract =  xs liability prio
+        let e = (generateEvents2  [DE] [Storm] 2017 [loss]) |> List.head
+        let (re, payment), cumul = calcCumul contract 0.0 e 
+        let expected = (min (max (loss - prio) 0.0) liability) 
+        sprintf "payment = %A, loss = %A" payment loss @| (
+            "loss >=0" @| (payment >= 0.0) .&. 
+            "loss < lia" @| (payment < liability) .&.
+            (sprintf "loss = expected (%A)" expected) @| (payment = expected)
+        )
+
+    
+    [<Property(QuietOnSuccess = true)>]
+    let ``layerPayment works with a zero cumul`` (l : uint16) = 
+        let loss = float l
+        let prio = 3000.0
+        let liability = 5000.0
+        let contract =  xs liability prio
+        let expected = (min (max (loss - prio) 0.0) liability) 
+        let payment = layerPayment contract 0.0 loss
+        sprintf "payment = %A, loss = %A" payment loss @| (
+            "loss >=0" @| (payment >= 0.0) .&. 
+            "loss < lia" @| (payment < liability) .&.
+            (sprintf "payment = expected (%A)" expected) @| (payment = expected)
+        )
+
+    [<Property(QuietOnSuccess = true)>]
+    let ``layerPayment works with a non-zero cumul below prio`` (l : uint16) = 
+        let loss = float l
+        let prio = 3000.0
+        let liability = 5000.0
+        let contract =  xs liability prio
+        let cumul = 100.0
+        let expected = (min (max (cumul+loss - prio) 0.0) liability) 
+        let payment = layerPayment contract cumul loss
+        sprintf "payment = %A, loss = %A" payment loss @| (
+            "loss >=0" @| (payment >= 0.0) .&. 
+            "loss < lia" @| (payment < liability) .&.
+            (sprintf "payment = expected (%A)" expected) @| (payment = expected)
+        )
+    [<Property(Verbose = false)>]
+    let ``layerPayment works with a non-zero cumul above prio`` (l : uint16) = 
+        let loss = float l
+        let prio = 300.0
+        let liability = 50.0
+        let contract =  xs liability prio
+        let cumul = 345.0
+        let expected = (min (max (cumul+loss - prio) 0.0) liability) + prio - cumul
+        let payment = layerPayment contract cumul loss
+        sprintf "payment = %A, loss = %A" payment loss @| (
+            "payment >=0" @| (payment >= 0.0) .&. 
+            "payment <= lia" @| (payment <= liability) .&.
+            (sprintf "payment = expected (%A)" expected) @| (payment = expected)
+        )
+        |> Prop.classify (loss + cumul > prio + liability) "above plafond"
+         |> Prop.classify (loss + cumul < prio + liability) "below plafond"
+        // |> Prop.collect l
