@@ -55,23 +55,23 @@
     // (in sum lower than prio) have nothing to pay, whereas as later events have to pay. 
     // This may be a partial payment of the loss, if we jump from lower than prio to above prio. 
     // Therefore we the min-function to derive the payment.
-    let calcCumul (contract: StopLossContract) (cumul: float) (e : RiskEvent) = 
-        let cut sum loss = 
-            if sum + loss < contract.plafond then min loss (sum + loss - contract.priority)
-            else min loss (contract.plafond - sum)
-        let payment sum loss = 
-            match (sum, loss) with
-            | (sum, loss) when sum + loss < contract.priority  -> 0.0
-            | (sum, loss) when sum > contract.plafond    -> 0.0
-            | (sum, loss) -> cut sum loss
-        in ((e, payment cumul e.loss ), cumul + e.loss)
+
+    let layerPayment (contract: StopLossContract) (cumul: float) (loss: float) = 
+        let fullLoss = cumul + loss
+        if   fullLoss <= contract.priority then 0.0
+        elif cumul > contract.plafond then 0.0
+        // loss > prio
+        elif cumul <= contract.priority then fullLoss - contract.priority
+        else (min fullLoss contract.plafond) - cumul
     
+    let calcCumul (contract: StopLossContract) (cumul: float) (e : RiskEvent) = 
+        ((e, layerPayment contract cumul e.loss), cumul + e.loss)
 
     let applyEventsSL (contract: StopLossContract) (events: RiskEvent list) : ContractEvent list = 
         events
         |> List.mapFold (calcCumul contract) 0.0
         |> fst // ignore the cumul summary here (technically required from mapFold)
-        |> List.map (fun (e, cumul) -> makeContractEvent e (min e.loss cumul))
+        |> List.map (fun (e, payment) -> makeContractEvent e payment)
 
 
     // An XL per Risk Contract is a list of layers, which are StopLoss Contracts
@@ -94,8 +94,8 @@
     let applyEventsXLperRisk (xl : XLperRiskContract) (es : RiskEvent list) = 
         let (yes, no) = es |> List.partition (fun e -> xl.risks |> contains e.risk)
         
-        (xl.layers |> List.collect (fun sl -> applyEventsSL sl yes))
-        |> List.append (no |> List.map (fun e -> makeContractEvent e 0.0))
+        (xl.layers |> List.collect (fun layer -> applyEventsSL layer yes))
+        // |> List.append (no |> List.map (fun e -> makeContractEvent e 0.0))
 
     type Contract = 
         | QuotaShare of QuotaShareContract
