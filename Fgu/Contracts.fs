@@ -26,7 +26,7 @@
         plafond : float;
     }
 
-    // constructor for a Stop-Loss-Contract
+    // constructor for an XL-Contract
     let makeXL epi prio sl = 
         { 
             estimated_premium_income = epi;
@@ -49,8 +49,8 @@
             plafond = plafond;
         }
 
-    // An SL contracts summarizies about a year (or financial period, i.e. all members of of 
-    // the event list). Payments occur only within the band of prio and sl. We map here the 
+    // An XL contracts summarizies about a year (or financial period, i.e. all members of of 
+    // the event list). Payments occur only within the band of prio and liab. We map here the 
     // events to the their share of payments to be made. This means that the first events 
     // (in sum lower than prio) have nothing to pay, whereas as later events have to pay. 
     // This may be a partial payment of the loss, if we jump from lower than prio to above prio. 
