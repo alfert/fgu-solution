@@ -17,6 +17,27 @@
             events 
             |> List.map(fun e -> makeContractEvent e (e.loss * factor))
 
+    type SurplusContract = {
+        maximum : float; // what the insurers pays 
+        factor : float; 
+        plafond : float; // everything above that pay the insurer again
+    }
+
+    let applySurplus(contract: SurplusContract) (events: RiskEvent list) : ContractEvent list =
+        let payment loss value = 
+            if   value < contract.maximum then 0.0
+            elif value < contract.plafond then loss * ((value - contract.maximum)/value)
+            else 
+                loss * contract.factor * contract.maximum / value 
+        events 
+        |> List.map(fun e -> makeContractEvent e (payment e.loss e.value))
+
+    let makeSurPlus maximum factor = {
+        maximum = maximum;
+        factor = factor;
+        plafond = maximum * (1.0+factor)
+    }
+
     type ExcessOfLossContract = {
         estimated_premium_income : float; // EPI: what the insurance get from their customers
         priority_p : Percent; // this is the share that the insurance pays (% of EPI)
@@ -99,12 +120,14 @@
 
     type Contract = 
         | QuotaShare of QuotaShareContract
+        | SurPlus of SurplusContract
         | ExcessOfLoss of ExcessOfLossContract
         | XLperRisk of XLperRiskContract
 
 
     let applyEvents contract events = 
         match contract with
-        | QuotaShare qs -> applyEventsQS qs events    
+        | QuotaShare qs -> applyEventsQS qs events  
+        | SurPlus sp -> applySurplus sp events  
         | ExcessOfLoss sl   -> applyEventsXL sl events
         | XLperRisk xl  -> applyEventsXLperRisk xl events

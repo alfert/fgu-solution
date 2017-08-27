@@ -14,6 +14,7 @@
         day_of_year : int;
         year : int;
         loss : float;
+        value : float; // the insured value
         country : Country option;
         risk : NatCatRisk option;
     }
@@ -38,9 +39,12 @@
         let newDayAndId k = (rnd.Next(365) + 1, k)
         let c = selectOneOf countries
         let r = selectOneOf risks
-        let singleEvent day anId = {
-            day_of_year = day; year = the_year; 
-            loss = rnd.NextDouble()*(20.0*1000.0*1000.0); id = anId; country = c;  risk = r;
+        let singleEvent day anId = 
+            let aLoss = rnd.NextDouble()*(20.0*1000.0*1000.0)
+            {
+                day_of_year = day; year = the_year; 
+                loss = aLoss; value = 2.0 * aLoss; // we loose a half of everything ...
+                id = anId; country = c;  risk = r;
             }
         in
             [1..n]
@@ -53,6 +57,7 @@
         let makeEvent day id loss = {
             day_of_year = day; year = theYear; id = id; country = c; risk = r;
             loss = loss;
+            value = 2.0 * loss; // We loose a half of everything ...
         }
         losses 
         |> List.indexed
