@@ -29,14 +29,14 @@ module TestContracts
         // generate events and calc the summary here, compared to the sum of contract events
         let es = generateEvents (int eventCount) [DE] [Storm] 2017
         let q = 0.5
-        let c = makeSL (20.0 * 1000.0 * 1000.0) q q
+        let c = makeXL (20.0 * 1000.0 * 1000.0) q q
         // min(Haftung, max(0, X- Priorität))
-        let cut s = min c.stop_loss (max 0.0 (s - c.priority))
+        let cut s = min c.liability (max 0.0 (s - c.priority))
         let allLosses = es |> List.sumBy (fun (ev : RiskEvent) -> ev.loss) |> cut
         (allLosses)  .=.
-            (es |> (applyEventsSL c) |> List.sumBy (fun (ev : ContractEvent) -> ev.loss))
-        |> Prop.classify(allLosses >= c.stop_loss) "loss > plafond"
-        |> Prop.classify(allLosses < c.stop_loss && allLosses >= c.priority) "loss > prio"
+            (es |> (applyEventsXL c) |> List.sumBy (fun (ev : ContractEvent) -> ev.loss))
+        |> Prop.classify(allLosses >= c.liability) "loss > plafond"
+        |> Prop.classify(allLosses < c.liability && allLosses >= c.priority) "loss > prio"
         |> Prop.classify(allLosses < c.priority) "loss < prio"
         |> Prop.collect(List.length(es))
 
@@ -44,12 +44,12 @@ module TestContracts
     let ``1 event means easier argumentation``() = 
         let es = generateEvents 1 [DE] [Storm] 2017
         let q = 0.5
-        let c = makeSL (20.0 * 1000.0 * 1000.0) q q 
-        let losses = es |> applyEventsSL c
+        let c = makeXL (20.0 * 1000.0 * 1000.0) q q 
+        let losses = es |> applyEventsXL c
         List.length(losses) |> should equal 1
         let l = losses.Head
         let e = es.Head 
-        let expectedPayment = min c.stop_loss (max 0.0 (e.loss - c.priority))
+        let expectedPayment = min c.liability (max 0.0 (e.loss - c.priority))
         l.loss |> should equal expectedPayment
 
     [<Property()>]

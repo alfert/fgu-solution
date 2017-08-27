@@ -17,23 +17,23 @@
             events 
             |> List.map(fun e -> makeContractEvent e (e.loss * factor))
 
-    type StopLossContract = {
+    type ExcessOfLossContract = {
         estimated_premium_income : float; // EPI: what the insurance get from their customers
         priority_p : Percent; // this is the share that the insurance pays (% of EPI)
-        stop_loss_p : Percent; // this is the share that reinsurance pays (% of EPI)
+        liability_p : Percent; // this is the share that reinsurance pays (% of EPI)
         priority : float;
-        stop_loss : float;
+        liability : float;
         plafond : float;
     }
 
     // constructor for a Stop-Loss-Contract
-    let makeSL epi prio sl = 
+    let makeXL epi prio sl = 
         { 
             estimated_premium_income = epi;
             priority_p = prio;
-            stop_loss_p = sl;
+            liability_p = sl;
             priority = epi * prio;
-            stop_loss = epi * sl;
+            liability = epi * sl;
             plafond = epi * (prio + sl);
         }
 
@@ -43,9 +43,9 @@
         { 
             estimated_premium_income = plafond;
             priority_p = priority / plafond;
-            stop_loss_p = liability / plafond;
+            liability_p = liability / plafond;
             priority = priority;
-            stop_loss = liability;
+            liability = liability;
             plafond = plafond;
         }
 
@@ -56,7 +56,7 @@
     // This may be a partial payment of the loss, if we jump from lower than prio to above prio. 
     // Therefore we the min-function to derive the payment.
 
-    let layerPayment (contract: StopLossContract) (cumul: float) (loss: float) = 
+    let layerPayment (contract: ExcessOfLossContract) (cumul: float) (loss: float) = 
         let fullLoss = cumul + loss
         if   fullLoss <= contract.priority then 0.0
         elif cumul > contract.plafond then 0.0
@@ -64,26 +64,26 @@
         elif cumul <= contract.priority then fullLoss - contract.priority
         else (min fullLoss contract.plafond) - cumul
     
-    let calcCumul (contract: StopLossContract) (cumul: float) (e : RiskEvent) = 
+    let calcCumul (contract: ExcessOfLossContract) (cumul: float) (e : RiskEvent) = 
         ((e, layerPayment contract cumul e.loss), cumul + e.loss)
 
-    let applyEventsSL (contract: StopLossContract) (events: RiskEvent list) : ContractEvent list = 
+    let applyEventsXL (contract: ExcessOfLossContract) (events: RiskEvent list) : ContractEvent list = 
         events
         |> List.mapFold (calcCumul contract) 0.0
         |> fst // ignore the cumul summary here (technically required from mapFold)
         |> List.map (fun (e, payment) -> makeContractEvent e payment)
 
 
-    // An XL per Risk Contract is a list of layers, which are StopLoss Contracts
+    // An XL per Risk Contract is a list of layers, which are ExcessOfLoss Contracts
     type XLperRiskContract = {
         risks : NatCatRisk list;
-        layers : StopLossContract list;
+        layers : ExcessOfLossContract list;
     }
 
-    let makeXLperRisk (rs: NatCatRisk list) (slLayers: StopLossContract list) = 
+    let makeXLperRisk (rs: NatCatRisk list) (xlLayers: ExcessOfLossContract list) = 
         {
             risks = rs;
-            layers = slLayers;
+            layers = xlLayers;
         }
 
     let contains x ys = 
@@ -94,17 +94,17 @@
     let applyEventsXLperRisk (xl : XLperRiskContract) (es : RiskEvent list) = 
         let (yes, no) = es |> List.partition (fun e -> xl.risks |> contains e.risk)
         
-        (xl.layers |> List.collect (fun layer -> applyEventsSL layer yes))
+        (xl.layers |> List.collect (fun layer -> applyEventsXL layer yes))
         // |> List.append (no |> List.map (fun e -> makeContractEvent e 0.0))
 
     type Contract = 
         | QuotaShare of QuotaShareContract
-        | StopLoss of StopLossContract
+        | ExcessOfLoss of ExcessOfLossContract
         | XLperRisk of XLperRiskContract
 
 
     let applyEvents contract events = 
         match contract with
         | QuotaShare qs -> applyEventsQS qs events    
-        | StopLoss sl   -> applyEventsSL sl events
+        | ExcessOfLoss sl   -> applyEventsXL sl events
         | XLperRisk xl  -> applyEventsXLperRisk xl events
