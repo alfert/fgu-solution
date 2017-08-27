@@ -47,6 +47,7 @@
     <None Include="Script.fsx" />
     <Compile Include="Events.fs" />
     <Compile Include="Contracts.fs" />
+    <Compile Include="Dsl.fs" />
   </ItemGroup>
   <PropertyGroup>
     <MinimumVisualStudioVersion Condition="'$(MinimumVisualStudioVersion)' == ''">11</MinimumVisualStudioVersion>
